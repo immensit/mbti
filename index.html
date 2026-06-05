@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>특BTI - 연령 맞춤형 성격 진단</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Pretendard',sans-serif;
+    background:#f4f6f8;
+}
+
+.app{
+    max-width:430px;
+    min-height:100vh;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.screen{
+    display:none;
+    flex:1;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+
+.screen.active{
+    display:flex;
+}
+
+h1{
+    text-align:center;
+    color:#222;
+    line-height:1.4;
+    margin-bottom:15px;
+}
+
+.subtitle{
+    color:#007bff;
+    font-size:18px;
+    font-weight:700;
+}
+
+p{
+    text-align:center;
+    color:#666;
+    line-height:1.6;
+}
+
+select,
+button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    margin-top:10px;
+}
+
+select{
+    border:1px solid #ddd;
+}
+
+.main-btn{
+    background:#007bff;
+    color:#fff;
+    font-weight:700;
+}
+
+.answer-btn{
+    background:#f8f9fa;
+    color:#333;
+    border:1px solid #ddd;
+}
+
+.answer-btn:hover{
+    background:#e9ecef;
+}
+
+.question-title{
+    font-size:20px;
+    text-align:center;
+    margin:25px 0;
+    line-height:1.5;
+    min-height:120px;
+}
+
+.progress{
+    color:#007bff;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.type-title{
+    font-size:48px;
+    font-weight:900;
+    color:#001f3f;
+    margin-top:15px;
+}
+
+.idol{
+    color:#ff4757;
+    font-weight:700;
+    margin:10px 0 20px;
+    text-align:center;
+}
+
+.bar-wrap{
+    width:100%;
+    margin-top:20px;
+}
+
+.bar-box{
+    display:flex;
+    width:100%;
+    height:28px;
+    background:#eee;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:12px;
+}
+
+.left{
+    background:#007bff;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    padding-left:10px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.right{
+    background:#ff4757;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    padding-right:10px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.desc{
+    margin-top:20px;
+    background:#f8fbff;
+    padding:15px;
+    border-radius:12px;
+    color:#333;
+    line-height:1.7;
+}
+
+.share-btn{
+    background:#28a745;
+    color:white;
+}
+
+.reset-btn{
+    background:#333;
+    color:white;
+}
+</style>
+
+</head>
+<body>
+
+<div class="app">
+
+```
+<div id="start" class="screen active">
+    <h1>
+        특BTI<br>
+        <span class="subtitle">연령 맞춤형 심층 성격 진단</span>
+    </h1>
+
+    <p>
+        연령대별 맞춤 질문으로<br>
+        당신의 성향을 분석해드립니다.
+    </p>
+
+    <select id="age">
+        <option value="student">학생</option>
+        <option value="worker">직장인</option>
+        <option value="senior">노년층</option>
+    </select>
+
+    <button class="main-btn" onclick="startTest()">
+        검사 시작하기
+    </button>
+</div>
+
+<div id="question" class="screen">
+    <div id="qNum" class="progress">Q 1 / 8</div>
+
+    <div id="qText" class="question-title"></div>
+
+    <button class="answer-btn" onclick="answer(4)">매우 그렇다</button>
+    <button class="answer-btn" onclick="answer(3)">그렇다</button>
+    <button class="answer-btn" onclick="answer(2)">아니다</button>
+    <button class="answer-btn" onclick="answer(1)">매우 아니다</button>
+</div>
+
+<div id="result" class="screen">
+
+    <h3>당신의 특BTI 결과</h3>
+
+    <div id="mbti" class="type-title"></div>
+
+    <div id="idol" class="idol"></div>
+
+    <div class="bar-wrap">
+        <div class="bar-box">
+            <div id="barE" class="left">E</div>
+            <div id="barI" class="right">I</div>
+        </div>
+
+        <div class="bar-box">
+            <div id="barS" class="left">S</div>
+            <div id="barN" class="right">N</div>
+        </div>
+
+        <div class="bar-box">
+            <div id="barT" class="left">T</div>
+            <div id="barF" class="right">F</div>
+        </div>
+
+        <div class="bar-box">
+            <div id="barJ" class="left">J</div>
+            <div id="barP" class="right">P</div>
+        </div>
+    </div>
+
+    <div id="desc" class="desc"></div>
+
+    <button class="share-btn" onclick="shareResult()">
+        결과 공유하기
+    </button>
+
+    <button class="reset-btn" onclick="location.reload()">
+        다시 검사하기
+    </button>
+
+</div>
+```
+
+</div>
+
+<script>
+
+const questions = [
+{type:"EI",text:"사람들과 함께 있을 때 에너지가 생긴다."},
+{type:"EI",text:"새로운 사람을 만나는 것이 즐겁다."},
+
+{type:"SN",text:"상상보다 현실적인 사실이 중요하다."},
+{type:"SN",text:"세부사항을 꼼꼼히 보는 편이다."},
+
+{type:"TF",text:"결정할 때 감정보다 논리를 우선한다."},
+{type:"TF",text:"공정보다는 효율성이 중요하다."},
+
+{type:"JP",text:"계획을 세우고 움직이는 것을 좋아한다."},
+{type:"JP",text:"예정에 없던 변화가 불편하다."}
+];
+
+const results={
+ISTJ:{
+idol:"대표 유형 : 책임감 있는 관리자",
+desc:"체계적이고 신뢰감이 높으며 맡은 일을 끝까지 완수하는 성향입니다."
+},
+ISFJ:{
+idol:"대표 유형 : 따뜻한 수호자",
+desc:"배려심이 깊고 주변 사람들을 세심하게 챙기는 성향입니다."
+},
+INFJ:{
+idol:"대표 유형 : 통찰력 있는 조언가",
+desc:"깊은 사고와 강한 신념을 가진 이상주의자입니다."
+},
+INTJ:{
+idol:"대표 유형 : 전략가",
+desc:"장기적인 계획 수립과 목표 달성에 강점을 보입니다."
+},
+ESTP:{
+idol:"대표 유형 : 행동가",
+desc:"도전 정신이 강하고 위기 상황에 빠르게 대응합니다."
+},
+ESFP:{
+idol:"대표 유형 : 분위기 메이커",
+desc:"사교적이며 즐거움을 만드는 능력이 뛰어납니다."
+},
+ENFP:{
+idol:"대표 유형 : 열정가",
+desc:"창의적이며 사람들에게 긍정적인 영향을 줍니다."
+},
+ENTJ:{
+idol:"대표 유형 : 리더",
+desc:"결단력과 추진력이 강한 성향입니다."
+}
+};
+
+let index=0;
+
+let score={
+E:0,I:0,
+S:0,N:0,
+T:0,F:0,
+J:0,P:0
+};
+
+function startTest(){
+
+document.getElementById("start").classList.remove("active");
+document.getElementById("question").classList.add("active");
+
+render();
+}
+
+function render(){
+
+document.getElementById("qNum").innerText=
+`Q ${index+1} / ${questions.length}`;
+
+document.getElementById("qText").innerText=
+questions[index].text;
+}
+
+function answer(value){
+
+let type=questions[index].type;
+
+if(type==="EI"){
+value>=3 ? score.E+=value : score.I+=(5-value);
+}
+
+if(type==="SN"){
+value>=3 ? score.S+=value : score.N+=(5-value);
+}
+
+if(type==="TF"){
+value>=3 ? score.T+=value : score.F+=(5-value);
+}
+
+if(type==="JP"){
+value>=3 ? score.J+=value : score.P+=(5-value);
+}
+
+index++;
+
+if(index>=questions.length){
+showResult();
+return;
+}
+
+render();
+}
+
+function showResult(){
+
+document.getElementById("question").classList.remove("active");
+document.getElementById("result").classList.add("active");
+
+let mbti=
+(score.E>=score.I?"E":"I")+
+(score.S>=score.N?"S":"N")+
+(score.T>=score.F?"T":"F")+
+(score.J>=score.P?"J":"P");
+
+if(!results[mbti]){
+results[mbti]={
+idol:"특BTI 사용자",
+desc:"균형 잡힌 성향을 가진 유형입니다."
+};
+}
+
+document.getElementById("mbti").innerText=mbti;
+document.getElementById("idol").innerText=results[mbti].idol;
+document.getElementById("desc").innerText=results[mbti].desc;
+
+setBar("E","I",score.E,score.I);
+setBar("S","N",score.S,score.N);
+setBar("T","F",score.T,score.F);
+setBar("J","P",score.J,score.P);
+}
+
+function setBar(a,b,left,right){
+
+let total=left+right || 1;
+let lp=Math.round(left/total*100);
+let rp=100-lp;
+
+document.getElementById("bar"+a).style.width=lp+"%";
+document.getElementById("bar"+a).innerText=a+" "+lp+"%";
+
+document.getElementById("bar"+b).style.width=rp+"%";
+document.getElementById("bar"+b).innerText=rp+"% "+b;
+}
+
+function shareResult(){
+
+const mbti=document.getElementById("mbti").innerText;
+
+if(navigator.share){
+
+navigator.share({
+title:"특BTI 결과",
+text:"내 결과는 "+mbti+" 입니다!"
+});
+
+}else{
+
+alert("내 결과는 "+mbti+" 입니다!");
+}
+}
+
+</script>
+
+</body>
+</html>
